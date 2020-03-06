@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+### 更新incubator-pagespeed-ngx.tar.xz文件
+# why：pagespeed需要直接下载github release，而不是克隆源码（否则会非常麻烦）
+# 但是github release在aws上，并且pagespeed依赖位于dl.google.com上的psol。
+# 所以由于众所周知的原因，需要提前在有代理的环境下载源码并提交
+
+die() {
+    echo "$@" >&2
+    exit 1
+}
+
+ROOT="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
+
+cd /tmp
+CTMP_PATH=ngx-pagespeed.${RANDOM}
+mkdir -p $CTMP_PATH
+cd $CTMP_PATH
+
+if ! [[ -e /tmp/incubator-pagespeed-ngx.tar.gz ]] ; then
+	wget https://github.com/apache/incubator-pagespeed-ngx/archive/latest-stable.tar.gz \
+		-O /tmp/incubator-pagespeed-ngx.tar.gz.downloading \
+		--quiet --continue --show-progress --progress=bar:force:noscroll || die "Cannot download from github"
+	mv /tmp/incubator-pagespeed-ngx.tar.gz.downloading /tmp/incubator-pagespeed-ngx.tar.gz
+fi
+tar xf /tmp/incubator-pagespeed-ngx.tar.gz --strip-components=1
+
+URL=$(cat PSOL_BINARY_URL | sed 's!$BIT_SIZE_NAME!x64!g')
+if ! [[ -e /tmp/psol.tar.gz ]] ; then
+	wget ${URL}  \
+		-O /tmp/psol.tar.gz.downloading \
+		--quiet --continue --show-progress --progress=bar:force:noscroll || die "Cannot download from dl.google"
+	mv /tmp/psol.tar.gz.downloading /tmp/psol.tar.gz
+fi
+mkdir psol
+tar xf /tmp/psol.tar.gz --strip-components=1 -C psol
+
+cd "$ROOT/source/modules"
+rm -rf incubator-pagespeed-ngx
+mv /tmp/$CTMP_PATH incubator-pagespeed-ngx
+
+echo "Done."

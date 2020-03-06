@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [[ -z "$1" ]]; then
+	echo "Usage: $0 <user>/<git-repo>"
+	exit 1
+fi
+
+cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+cd ..
+
+USER=$(dirname "$1")
+REPO=$(basename "$1" .git)
+
+set -x
+git submodule add --force "git@github.com:$USER/$REPO.git" source/modules/$REPO

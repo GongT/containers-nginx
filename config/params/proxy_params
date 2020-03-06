@@ -1,0 +1,14 @@
+proxy_buffer_size 1m;
+proxy_buffers 16 1m;
+proxy_busy_buffers_size 1m;
+proxy_intercept_errors on;
+proxy_set_header Host $domain;
+proxy_http_version 1.1;
+proxy_set_header X-H2                 $rproxy_http2;
+proxy_set_header X-Real-IP            $realip_remote_addr;
+proxy_set_header X-Forwarded-For      $proxy_add_x_forwarded_for;
+proxy_set_header X-Remote-Port        $realip_remote_port;
+proxy_set_header X-Forwarded-Proto    $rproxy_protocol;
+proxy_set_header X-Server-Addr        $rproxy_server_addr;
+proxy_set_header X-Server-Port        $rproxy_server_port;
+proxy_set_header X-Compressing        "yes";

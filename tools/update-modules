@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+die() {
+    echo "$@" >&2
+    exit 1
+}
+
+ROOT="$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
+
+cd "$ROOT/source/modules"
+
+for i in */.git ; do
+	cd "$(dirname "$i")"
+	echo "Updating: $(dirname "$i")..."
+	{
+		git checkout master
+		git reset --hard
+		git pull
+	} || die "Failed."
+	cd ..
+done
+
+cd ../nginx
+echo "Updating: nginx core..."
+{
+	git checkout master
+	git reset --hard
+	git pull
+} || die "Failed."
+
+echo "Done."
