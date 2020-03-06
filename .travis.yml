@@ -6,18 +6,19 @@ branches:
 before_install:
   - . /etc/os-release
   - sudo sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/x${ID^}_${VERSION_ID}/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
-  - wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${ID^}_${VERSION_ID}/Release.key -O Release.key
+  - sudo wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/x${ID^}_${VERSION_ID}/Release.key -O Release.key
   - sudo apt-key add - < Release.key
   - sudo apt-get update
   - sudo apt-get -y install buildah
 
-script: ./build.sh
+script: sudo bash ./build.sh
 
 after_success:
-  - buildah push localhost/gongt/nginx oci-archive:./.cache/nginx.oci:gongt/nginx:latest
+  - sudo buildah push localhost/gongt/nginx oci-archive:./.cache/nginx.oci:gongt/nginx:latest
 
 before_script:
-  - buildah pull oci-archive:./.cache/nginx.oci || true
+  - sudo buildah pull oci-archive:./.cache/nginx.oci || true
+  - sudo buildah pull fedora
 
 cache:
   directories:
